@@ -1,0 +1,16 @@
+#!/bin/bash
+
+PROJECT_GITENCRYPT_PATH_TO_SECRETS=./.gitencrypt_secrets
+# Check env variables
+if [[ ! -n "$GITENCRYPT_PASS_FIXED" ]]; then
+    # Check project variables
+    if [[ ! -f "$(pwd)/$PROJECT_GITENCRYPT_PATH_TO_SECRETS" ]]; then
+        >&2 echo "Please set 'GITENCRYPT_SALT_FIXED' and 'GITENCRYPT_PASS_FIXED' to env varibles"
+        >&2 echo "Or define them in '$DEFAULT_GITENCRYPT_PATH_TO_SECRETS' file"
+        exit 1
+    else
+        set -o allexport && source $PROJECT_GITENCRYPT_PATH_TO_SECRETS && set +o allexport
+    fi
+fi
+
+export GITENCRYPT_OPEN_SSL_COMMMAND="openssl enc -base64 -aes-256-ecb -pbkdf2 -k $GITENCRYPT_PASS_FIXED"

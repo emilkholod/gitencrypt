@@ -1,3 +1,5 @@
+# NOT TESTED
+
 # Continuous Integration
 
 Detailing how to use the secrets repository with automated/continuous integration environment with a select set of tools (Jenkins, Packer, and Puppet).
@@ -48,7 +50,7 @@ Needed Jenkins Plugins:
 4. Add the "git@github.com/<project path>.git" for the secrets repository.
 ![Step Five through Eight](http://i.imgur.com/sBRjA2nh.png)
 5. Under the "Build" heading add an "Execute Shell" build step.
-6. Copy the "smudge_filter_openssl" file contents into the "Execute Shell" "Command" textfield.
+6. Copy the "gitconfig_filter_openssl_smudge" file contents into the "Execute Shell" "Command" textfield.
 7. Replace the "$PASS_FIXED" value with your password; Alternatively it should be set as an environment variable on the Jenkins server.
 8. In the example screenshot above we decrypting exactly one file for our project by specifying the file's path using the "-in" flag and redirecting output to a new file.
 9. Add a "Post-build Action" of type "Archive the artifacts" -- then specify the file name you redirected output to for decryption from step eight.  This will make the decrypted file available to other Jenkin's jobs.

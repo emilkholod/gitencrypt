@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# GITENCRYPT_SALT_FIXED=<your-salt> # 24 or less hex characters
+# GITENCRYPT_PASS_FIXED=<your-passphrase>
+
+. "$(pwd)"/.gitencrypt/base_script
+
+"$GITENCRYPT_OPEN_SSL_COMMMAND" -S $GITENCRYPT_SALT_FIXED
+

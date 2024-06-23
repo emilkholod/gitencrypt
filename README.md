@@ -22,17 +22,17 @@ Before creating the repository, the workstation which will initialize the reposi
 ```shell
 mkdir .gitencrypt
 cd !$
-touch clean_filter_openssl smudge_filter_openssl diff_filter_openssl
+touch gitconfig_filter_openssl_clean gitconfig_filter_openssl_smudge gitconfig_diff_openssl_textconv
 chmod -R 700 ~/.gitencrypt
 ```
 
-`clean_filter_openssl` will encrypt the contents of the repository.
+`gitconfig_filter_openssl_clean` will encrypt the contents of the repository.
 
-`smudge_filter_openssl` will decrypt the contents of the repository.
+`gitconfig_filter_openssl_smudge` will decrypt the contents of the repository.
 
-`diff_filter_openssl` will be used to compare files when using `git diff`.
+`gitconfig_diff_openssl_textconv` will be used to compare files when using `git diff`.
 
-Contents of `clean_filter_openssl`:
+Contents of `gitconfig_filter_openssl_clean`:
 ```bash
 #!/bin/bash
 
@@ -46,7 +46,7 @@ Replace `<your-salt>` with 24 or less hex characters and `<your-passphrase>` wit
 
 See https://www.openssl.org/docs/apps/enc.html for more details about the encoding command being used here.
 
-Contents of `smudge_filter_openssl`:
+Contents of `gitconfig_filter_openssl_smudge`:
 ```bash
 #!/bin/bash
 
@@ -58,9 +58,9 @@ PASS_FIXED=<your-passphrase>
 openssl enc -d -base64 -aes-256-ecb -k $PASS_FIXED 2> /dev/null || cat
 ```
 
-Replace `<your-passphrase>` with the passphrase used in `clean_filter_openssl`.
+Replace `<your-passphrase>` with the passphrase used in `gitconfig_filter_openssl_clean`.
 
-Contents of `diff_filter_openssl`:
+Contents of `gitconfig_diff_openssl_textconv`:
 ```bash
 #!/bin/bash
 
@@ -71,7 +71,7 @@ PASS_FIXED=<your-passphrase>
 openssl enc -d -base64 -aes-256-ecb -k $PASS_FIXED -in "$1" 2> /dev/null || cat "$1"
 ```
 
-Replace `<your-passphrase>` with the passphrase used in `clean_filter_openssl`.
+Replace `<your-passphrase>` with the passphrase used in `gitconfig_filter_openssl_clean`.
 
 Files in the `.gitencrypt` directory should only be stashed locally and never shared with any person or system that should not have access to these secrets.
 
@@ -82,10 +82,10 @@ The repository needs to be configured to use these `.gitencrypt` scripts as defi
 Navigate to the new repo then open `.git/config` and add the following to the end of the file where `filter` and `diff` attributes are assigned to drivers named `openssl`:
 ```
 [filter "openssl"]
-    smudge = ~/.gitencrypt/smudge_filter_openssl
-    clean = ~/.gitencrypt/clean_filter_openssl
+    smudge = ~/.gitencrypt/gitconfig_filter_openssl_smudge
+    clean = ~/.gitencrypt/gitconfig_filter_openssl_clean
 [diff "openssl"]
-    textconv = ~/.gitencrypt/diff_filter_openssl
+    textconv = ~/.gitencrypt/gitconfig_diff_openssl_textconv
 ```
 
 In the project directory create and open `.gitattributes` and add the following content:
@@ -154,10 +154,10 @@ vi .git/config
 The following snippit should be appended to `.git/config` as seen in the section "Inital Setup":
 ```
 [filter "openssl"]
-    smudge = ~/.gitencrypt/smudge_filter_openssl
-    clean = ~/.gitencrypt/clean_filter_openssl
+    smudge = ~/.gitencrypt/gitconfig_filter_openssl_smudge
+    clean = ~/.gitencrypt/gitconfig_filter_openssl_clean
 [diff "openssl"]
-    textconv = ~/.gitencrypt/diff_filter_openssl
+    textconv = ~/.gitencrypt/gitconfig_diff_openssl_textconv
 ```
 
 3) Then `.gitattributes` will need to be added manually and a [copy can be found in this repo](https://github.com/ckelner/encrypted-secrets/blob/master/.gitattributes).
@@ -170,9 +170,9 @@ $ vi .gitattributes
 .gitattributes -filter -diff
 README.md -filter -diff
 gitconfig -filter -diff
-clean_filter_openssl -filter -diff
-diff_filter_openssl -filter -diff
-smudge_filter_openssl -filter -diff
+gitconfig_filter_openssl_clean -filter -diff
+gitconfig_diff_openssl_textconv -filter -diff
+gitconfig_filter_openssl_smudge -filter -diff
 [merge]
     renormalize=true
 ```
