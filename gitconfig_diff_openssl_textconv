@@ -6,5 +6,5 @@
 . "$(pwd)"/.gitencrypt/base_script
 
 # Error messages are redirect to /dev/null.
-"$GITENCRYPT_OPEN_SSL_COMMMAND" -d -in "$1" 2> /dev/null || cat "$1"
+$GITENCRYPT_OPEN_SSL_COMMMAND -d -in "$1" 2> /dev/null || cat "$1"
 
