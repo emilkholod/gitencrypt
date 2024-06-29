@@ -20,10 +20,10 @@ For a complete end to end solution to deploy secrets in a CI environment, see: h
 
 Before creating the repository, the workstation which will initialize the repository must be setup first.  Perform the following commands in user's home directory `~/`:
 ```shell
-mkdir .gitencrypt
+mkdir gitencrypt
 cd !$
 touch gitconfig_filter_openssl_clean gitconfig_filter_openssl_smudge gitconfig_diff_openssl_textconv
-chmod -R 700 ~/.gitencrypt
+chmod -R 700 ~/gitencrypt
 ```
 
 `gitconfig_filter_openssl_clean` will encrypt the contents of the repository.
@@ -73,19 +73,19 @@ openssl enc -d -base64 -aes-256-ecb -k $PASS_FIXED -in "$1" 2> /dev/null || cat 
 
 Replace `<your-passphrase>` with the passphrase used in `gitconfig_filter_openssl_clean`.
 
-Files in the `.gitencrypt` directory should only be stashed locally and never shared with any person or system that should not have access to these secrets.
+Files in the `gitencrypt` directory should only be stashed locally and never shared with any person or system that should not have access to these secrets.
 
 ### Repository Setup
 
-The repository needs to be configured to use these `.gitencrypt` scripts as defined in "Initial Setup".  Create the git repository in GitHub then clone to desired directory.
+The repository needs to be configured to use these `gitencrypt` scripts as defined in "Initial Setup".  Create the git repository in GitHub then clone to desired directory.
 
 Navigate to the new repo then open `.git/config` and add the following to the end of the file where `filter` and `diff` attributes are assigned to drivers named `openssl`:
 ```
 [filter "openssl"]
-    smudge = ~/.gitencrypt/gitconfig_filter_openssl_smudge
-    clean = ~/.gitencrypt/gitconfig_filter_openssl_clean
+    smudge = ~/gitencrypt/gitconfig_filter_openssl_smudge
+    clean = ~/gitencrypt/gitconfig_filter_openssl_clean
 [diff "openssl"]
-    textconv = ~/.gitencrypt/gitconfig_diff_openssl_textconv
+    textconv = ~/gitencrypt/gitconfig_diff_openssl_textconv
 ```
 
 In the project directory create and open `.gitattributes` and add the following content:
@@ -154,10 +154,10 @@ vi .git/config
 The following snippit should be appended to `.git/config` as seen in the section "Inital Setup":
 ```
 [filter "openssl"]
-    smudge = ~/.gitencrypt/gitconfig_filter_openssl_smudge
-    clean = ~/.gitencrypt/gitconfig_filter_openssl_clean
+    smudge = ~/gitencrypt/gitconfig_filter_openssl_smudge
+    clean = ~/gitencrypt/gitconfig_filter_openssl_clean
 [diff "openssl"]
-    textconv = ~/.gitencrypt/gitconfig_diff_openssl_textconv
+    textconv = ~/gitencrypt/gitconfig_diff_openssl_textconv
 ```
 
 3) Then `.gitattributes` will need to be added manually and a [copy can be found in this repo](https://github.com/ckelner/encrypted-secrets/blob/master/.gitattributes).
