@@ -13,4 +13,4 @@ if [[ ! -n "$GITENCRYPT_PASS_FIXED" ]]; then
     fi
 fi
 
-export GITENCRYPT_OPEN_SSL_COMMMAND="openssl enc -base64 -aes-256-ecb -pbkdf2 -k $GITENCRYPT_PASS_FIXED"
+export GITENCRYPT_OPEN_SSL_COMMMAND="openssl enc -base64 -aes-256-ecb -pbkdf2 -k ${GITENCRYPT_PASS_FIXED}"

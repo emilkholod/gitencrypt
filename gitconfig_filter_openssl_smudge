@@ -5,4 +5,4 @@
 
 . ~/gitencrypt/base_script
 
-"$GITENCRYPT_OPEN_SSL_COMMMAND" -d 2> /dev/null || cat
+$GITENCRYPT_OPEN_SSL_COMMMAND -d 2> /dev/null || cat
