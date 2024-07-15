@@ -1,5 +1,5 @@
 [filter "openssl"]
-    smudge = ~/gitencrypt/gitconfig_filter_openssl_smudge
-    clean = ~/gitencrypt/gitconfig_filter_openssl_clean
+    smudge = ~/gitencrypt/gitconfig_filter_openssl_smudge %f
+    clean = ~/gitencrypt/gitconfig_filter_openssl_clean %f
 [diff "openssl"]
     textconv = ~/gitencrypt/gitconfig_diff_openssl_textconv

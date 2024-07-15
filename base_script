@@ -15,7 +15,7 @@ if [[ ! -n "$GITENCRYPT_PASS_FIXED" ]]; then
     fi
 fi
 
-GITENCRYPT_DEBUG=true
+GITENCRYPT_DEBUG=false
 GITENCRYPT_SEPARATOR=":"
 binary_to_hex="xxd -p -c 1000000000"
 hex_to_binary="xxd -r -p"
@@ -68,14 +68,15 @@ function get_creds() {
 function gitencrypt_openssl_command() {
     debug "--- OpenSSL Command ---" "$@"
     # TODO: Test this
-    if [[ ! -e "$PROJECT_GITENCRYPT_PATH_TO_DATA" ]]; then
-        touch "$PROJECT_GITENCRYPT_PATH_TO_DATA"
-    fi
+    # if [[ ! -e "$PROJECT_GITENCRYPT_PATH_TO_DATA" ]]; then
+    #     touch "$PROJECT_GITENCRYPT_PATH_TO_DATA"
+    # fi
     openssl enc -aes-256-ecb -pbkdf2 "$@"
 }
 
 
 function gitencrypt_crypt(){
+    debug "--- Gitencrypt Crypt ---" "$@"
     local password salt
     read password salt <<<$(get_creds "$1")
     if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_DATA ]]; then
@@ -87,6 +88,7 @@ function gitencrypt_crypt(){
 
 
 function gitencrypt_decrypt(){
+    debug "--- Gitencrypt Decrypt ---" "$@"
     local password salt
     read password salt <<<$(get_creds "$1")
     if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_DATA ]]; then
