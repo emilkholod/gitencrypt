@@ -62,6 +62,7 @@ class TestStringMethods(unittest.TestCase):
         )
         self.assertEqual(encoded_value, "U2FsdGVkX1/KR1rPDxyksAB2r3M/7XTT8xt3bJLksH4=\n")
 
+    def test_decode(self):
         decoded_value = eval_command(
             pipeline(
                 f"echo -en '{self.encoded_value_with_openssl_version_1_1_1}'",
@@ -77,7 +78,8 @@ class TestStringMethods(unittest.TestCase):
             ),
         )
         self.assertEqual(decoded_value, "secrets")
-
+    
+    def test_check_base64(self):
         decoded_value = eval_command(
             pipeline(
                 """
