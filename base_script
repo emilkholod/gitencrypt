@@ -1,17 +1,18 @@
 #!/bin/bash
 
-PROJECT_GITENCRYPT_PATH_TO_SECRETS=./.gitencrypt_secrets
-PROJECT_GITENCRYPT_PATH_TO_DATA=./gitencrypt_data
+
+PROJECT_GITENCRYPT_PATH_TO_PASSWORD=./.gitencrypt_password
+PROJECT_GITENCRYPT_PATH_TO_SECRETS=./gitencrypt_secrets
 
 # Check env variables
 if [[ ! -n "$GITENCRYPT_PASS_FIXED" ]]; then
     # Check project variables
-    if [[ ! -f "$(pwd)/$PROJECT_GITENCRYPT_PATH_TO_SECRETS" ]]; then
+    if [[ ! -f "$(pwd)/$PROJECT_GITENCRYPT_PATH_TO_PASSWORD" ]]; then
         >&2 echo "Please set 'GITENCRYPT_PASS_FIXED' to env varibles"
-        >&2 echo "Or define them in '$DEFAULT_GITENCRYPT_PATH_TO_SECRETS' file"
+        >&2 echo "Or define them in '$PROJECT_GITENCRYPT_PATH_TO_PASSWORD' file"
         exit 1
     else
-        set -o allexport && source $PROJECT_GITENCRYPT_PATH_TO_SECRETS && set +o allexport
+        set -o allexport && source $PROJECT_GITENCRYPT_PATH_TO_PASSWORD && set +o allexport
     fi
 fi
 
@@ -27,8 +28,10 @@ openssl_version="$(openssl version | grep -Po '(?<=OpenSSL )[^; ]+' | head -n 1)
 
 if [[ $openssl_version == 3.* ]]; then
     function openssl_crypt_fix(){
-        # Add salt prefix
-        $binary_to_hex | sed "s/^/53616c7465645f5f$1/" | $hex_to_binary
+        # Remove salt prefix
+        $binary_to_hex | sed "s/^53616c7465645f5f$1//" | $hex_to_binary
+        # # Add salt prefix
+        # $binary_to_hex | sed "s/^/53616c7465645f5f$1/" | $hex_to_binary
     };
     function openssl_decrypt_fix(){
         # Remove salt prefix
@@ -36,7 +39,10 @@ if [[ $openssl_version == 3.* ]]; then
     };
 else
     function openssl_crypt_fix(){
-        $binary_to_hex | sed "/^53616c7465645f5f/! s/^/53616c7465645f5f$1&/" | $hex_to_binary
+        # Remove salt prefix
+        $binary_to_hex | sed "s/^53616c7465645f5f$1//" | $hex_to_binary
+        # Add salt prefix if not exist
+        # $binary_to_hex | sed "/^53616c7465645f5f/! s/^/53616c7465645f5f$1&/" | $hex_to_binary
     };
     function openssl_decrypt_fix(){
         openssl_crypt_fix $1
@@ -45,17 +51,17 @@ fi
 
 function get_creds() {
     local path password salt secrets new_line
-    if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_DATA ]]; then
+    if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_SECRETS ]]; then
         echo "${GITENCRYPT_PASS_FIXED}"
     else
-        secrets=$(cat "$PROJECT_GITENCRYPT_PATH_TO_DATA" | grep "$1\\${GITENCRYPT_SEPARATOR}")
+        secrets=$(cat "$PROJECT_GITENCRYPT_PATH_TO_SECRETS" | grep "$1\\${GITENCRYPT_SEPARATOR}")
         if [ -z "$secrets" ]; then
             debug "--- Not Found secrets --- "
             password=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
             salt=$(tr -dc a-f0-9 </dev/urandom | head -c 16)
             new_line="$1${GITENCRYPT_SEPARATOR}${password}${GITENCRYPT_SEPARATOR}${salt}"
             debug "--- Create password ---" "$new_line"
-            echo -e "$new_line" >> $PROJECT_GITENCRYPT_PATH_TO_DATA
+            echo -e "$new_line" >> $PROJECT_GITENCRYPT_PATH_TO_SECRETS
         else
             debug "--- Found secrets --- " "$secrets"
             IFS=${GITENCRYPT_SEPARATOR} read path password salt <<<$(echo "$secrets")
@@ -68,10 +74,10 @@ function get_creds() {
 function gitencrypt_openssl_command() {
     debug "--- OpenSSL Command ---" "$@"
     # TODO: Test this
-    # if [[ ! -e "$PROJECT_GITENCRYPT_PATH_TO_DATA" ]]; then
-    #     touch "$PROJECT_GITENCRYPT_PATH_TO_DATA"
+    # if [[ ! -e "$PROJECT_GITENCRYPT_PATH_TO_SECRETS" ]]; then
+    #     touch "$PROJECT_GITENCRYPT_PATH_TO_SECRETS"
     # fi
-    openssl enc -aes-256-ecb -pbkdf2 "$@"
+    openssl enc -aes-256-ecb -pbkdf2 -iter 600000 "$@"
 }
 
 
@@ -79,7 +85,7 @@ function gitencrypt_crypt(){
     debug "--- Gitencrypt Crypt ---" "$@"
     local password salt
     read password salt <<<$(get_creds "$1")
-    if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_DATA ]]; then
+    if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_SECRETS ]]; then
         gitencrypt_openssl_command -e -k ${password} | base64 -w 64
     else
         gitencrypt_openssl_command -e -k ${password} -S ${salt} | openssl_crypt_fix ${salt} | base64 -w 64
@@ -91,7 +97,7 @@ function gitencrypt_decrypt(){
     debug "--- Gitencrypt Decrypt ---" "$@"
     local password salt
     read password salt <<<$(get_creds "$1")
-    if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_DATA ]]; then
+    if [[ "./$1" == $PROJECT_GITENCRYPT_PATH_TO_SECRETS ]]; then
         base64 -d | gitencrypt_openssl_command -d -k ${password}
     else
         base64 -d | openssl_decrypt_fix ${salt} | gitencrypt_openssl_command -d -k ${password} -S ${salt} || cat
