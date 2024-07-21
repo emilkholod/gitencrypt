@@ -50,7 +50,7 @@ class TestStringMethods(unittest.TestCase):
         # hex_to_binary = "hex_to_binary"
         # remove_null_byte = "tr -d \"\\r\\n\\0\""
         cls.encoded_value = "secrets"
-        cls.encoded_value_with_openssl_version_1_1_1 = "HAL0AC95o9K5gxqJWe0zJA==\n"
+        cls.encoded_value_with_openssl_version_1_1_1 = "U2FsdGVkX1/KR1rPDxyksBwC9AAveaPSuYMaiVntMyQ=\n"
         cls.encoded_value_with_openssl_version_3_0_13 = "HAL0AC95o9K5gxqJWe0zJA==\n"
         
     def test_encode(self):
@@ -60,12 +60,12 @@ class TestStringMethods(unittest.TestCase):
                 "gitencrypt_crypt",
             ),
         )
-        self.assertEqual(encoded_value, self.encoded_value_with_openssl_version_1_1_1)
+        self.assertEqual(encoded_value, self.encoded_value_with_openssl_version_3_0_13)
 
     def test_decode(self):
         decoded_value = eval_command(
             pipeline(
-                f"echo -en '{self.encoded_value_with_openssl_version_1_1_1}'",
+                f"echo '{self.encoded_value_with_openssl_version_1_1_1}'",
                 "gitencrypt_decrypt",
             ),
         )

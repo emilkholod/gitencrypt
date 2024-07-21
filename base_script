@@ -35,8 +35,6 @@ if [[ $openssl_version == 3.* ]]; then
     function openssl_crypt_fix(){
         # Remove salt prefix
         $binary_to_hex | sed "s/^53616c7465645f5f$1//" | $hex_to_binary
-        # # Add salt prefix
-        # $binary_to_hex | sed "s/^/53616c7465645f5f$1/" | $hex_to_binary
     };
     function openssl_decrypt_fix(){
         # Remove salt prefix
@@ -46,11 +44,10 @@ else
     function openssl_crypt_fix(){
         # Remove salt prefix
         $binary_to_hex | sed "s/^53616c7465645f5f$1//" | $hex_to_binary
-        # Add salt prefix if not exist
-        # $binary_to_hex | sed "/^53616c7465645f5f/! s/^/53616c7465645f5f$1&/" | $hex_to_binary
     };
     function openssl_decrypt_fix(){
-        openssl_crypt_fix $1
+        # Add salt prefix if not exists
+        $binary_to_hex | sed "/^53616c7465645f5f/! s/^/53616c7465645f5f$1&/" | $hex_to_binary
     };
 fi
 
