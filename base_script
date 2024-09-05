@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# TODO:
+# - сменить ecb шифрование на cbc или другую - всё равно не удасться сжимать нормально
+# - добавить отслеживание gitencrypt_password в gitencrypt_secrets
+# - добавить изменения для работы с ":::" - сгенерировать пароли и соли
+# - добавить перебор паролей и солей из файла для gitencrypt_secrets и .gitencrypt_password (нужно для работы с историей). Проверка правильности кодировки.
 
 PROJECT_GITENCRYPT_PATH_TO_PASSWORD=./.gitencrypt_password
 PROJECT_GITENCRYPT_PATH_TO_SECRETS=./gitencrypt_secrets
